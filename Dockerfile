@@ -14,7 +14,7 @@ FROM base AS builder
 
 RUN apk update && apk add --no-cache git
 
-ENV OPENAI_API_KEY="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"
+ENV NEXT_PUBLIC_API_KEY="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"
 ARG DOCKER=true
 
 WORKDIR /app
@@ -26,7 +26,7 @@ RUN yarn build
 FROM base AS runner
 WORKDIR /app
 
-ENV OPENAI_API_KEY="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"
+ENV NEXT_PUBLIC_API_KEY="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"
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
