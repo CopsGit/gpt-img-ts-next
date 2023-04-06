@@ -1,38 +1,22 @@
 FROM node:18-alpine AS base
 
-FROM base AS deps
-
-RUN apk add --no-cache libc6-compat
-
+# Set the working directory
 WORKDIR /app
 
+# Copy package.json and yarn.lock to the working directory
 COPY package.json yarn.lock ./
 
-RUN yarn install
+# Install dependencies with yarn
+RUN yarn install --frozen-lockfile
 
-FROM base AS builder
-
-RUN apk update && apk add --no-cache git
-
-ENV NEXT_PUBLIC_API_KEY="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"
-ARG DOCKER=true
-
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy the rest of the application code to the working directory
 COPY . .
 
+# Build the application for production
 RUN yarn build
 
-FROM base AS runner
-WORKDIR /app
-
-ENV NEXT_PUBLIC_API_KEY="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"
-
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/.next/server ./.next/server
-
+# Expose the port that the application will run on
 EXPOSE 3000
 
-CMD ["yarn","start"]
+# Start the application
+CMD [ "yarn", "start" ]
